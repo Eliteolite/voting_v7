@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NTIC - KANO Voting Portal</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>NTIC - KANO</h1>
+  <p>SRC Voting Portal</p>
+</header>
+
+<div class="header">
+<h1>NTIC - KANO</h1>
+<p>Official Election Portal</p>
+</div>
+<div class="card">
+<h2>Enter Student ID</h2>
+<input id="studentId" placeholder="NTIC001">
+<button onclick="startVoting()">Start Voting</button>
+<p id="error" class="error"></p>
+</div>
+<script>
+function startVoting(){
+const id=document.getElementById("studentId").value.trim();
+if(!id){document.getElementById("error").innerText="Enter valid ID";return;}
+localStorage.setItem("currentVoter",id);
+window.location.href="vote.html";
+}
+</script>
+
+<footer>
+  © 2026 NTIC-KANO. All rights reserved
+</footer>
+
+
+<div class="progress-bar"><div class="progress" id="progress"></div></div>
+<script>
+let progress = document.getElementById('progress');
+let width = 0;
+let interval = setInterval(()=>{
+  if(width>=100) clearInterval(interval);
+  else {
+    width+=10;
+    progress.style.width = width+'%';
+  }
+},200);
+</script>
+</body>
+</html>

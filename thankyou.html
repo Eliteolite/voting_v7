@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thank You - NTIC</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .thank-you-card { padding: 60px 40px; text-align: center; margin-top: 10vh; }
+        .success-icon { font-size: 4rem; color: #34d399; margin-bottom: 30px; display: block; animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .sub-text { font-weight: 300; font-size: 1.1rem; color: var(--text-muted); max-width: 400px; margin: 0 auto 40px; }
+        
+        .home-btn { 
+            display: inline-block; width: auto; background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); 
+            padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 600;
+        }
+        .home-btn:hover { background: var(--primary); color: #020617; }
+
+        .countdown { margin-top: 40px; font-size: 0.85rem; color: var(--text-muted); }
+        #seconds { color: var(--primary); font-family: monospace; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card thank-you-card">
+        <span class="success-icon">✓</span>
+        <h1>Vote Recorded!</h1>
+        <p class="sub-text">Your ballot has been successfully encrypted and added to the official tally.</p>
+
+        <a href="index.html" class="home-btn">Return to Home Now</a>
+
+        <div class="countdown">Redirecting in <span id="seconds">10</span>s</div>
+    </div>
+</div>
+
+<script>
+    // Timer
+    let time = 10;
+    setInterval(() => {
+        time--;
+        document.getElementById('seconds').innerText = time;
+        if(time <= 0) window.location.href = 'index.html';
+    }, 1000);
+
+    // Simple Confetti
+    window.onload = function() {
+        for(let i=0; i<70; i++) {
+            let p = document.createElement('div');
+            p.style.cssText = `position:fixed;width:8px;height:8px;background:hsl(${Math.random()*360},100%,50%);top:-10px;left:${Math.random()*100}%;z-index:99;pointer-events:none;`;
+            document.body.appendChild(p);
+            let y = -10, x = Math.random()*2-1, r = Math.random()*360;
+            function fall() {
+                y += 5; r += 5;
+                p.style.top = y + 'px'; p.style.transform = `rotate(${r}deg)`;
+                if(y < window.innerHeight) requestAnimationFrame(fall); else p.remove();
+            }
+            fall();
+        }
+    };
+</script>
+</body>
+</html>

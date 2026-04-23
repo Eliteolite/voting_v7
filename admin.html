@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="header">
+<h1>NTIC - KANO</h1>
+<p>Teachers Dashboard</p>
+</div>
+<div class="card">
+<input type="password" id="pass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+</div>
+<div id="dashboard"></div>
+<script>
+const PASSWORD="admin123";
+function login(){
+if(document.getElementById("pass").value!==PASSWORD){alert("Wrong Password");return;}
+loadDashboard();
+}
+function loadDashboard(){
+let votes=JSON.parse(localStorage.getItem("allVotes")||"[]");
+let dashboard=document.getElementById("dashboard");
+dashboard.innerHTML="";
+if(votes.length===0){dashboard.innerHTML="<p>No votes yet</p>";return;}
+let positions=Object.keys(votes[0].selections);
+positions.forEach(pos=>{
+let counts={};
+votes.forEach(v=>{
+let c=v.selections[pos];
+counts[c]=(counts[c]||0)+1;
+});
+let winner=Object.keys(counts).reduce((a,b)=>counts[a]>counts[b]?a:b);
+let container=document.createElement("div");
+container.className="card";
+container.innerHTML=`<h3>${pos}</h3><p>Winner: <strong>${winner}</strong></p>`;
+let canvas=document.createElement("canvas");
+container.appendChild(canvas);
+dashboard.appendChild(container);
+new Chart(canvas,{type:"pie",data:{labels:Object.keys(counts),datasets:[{data:Object.values(counts)}]}});
+let btn=document.createElement("button");
+btn.innerText="Download CSV";
+btn.onclick=function(){
+let rows="voter_id,candidate\n";
+votes.forEach(v=>{rows+=v.voter+","+v.selections[pos]+"\n";});
+let blob=new Blob([rows],{type:"text/csv"});
+let link=document.createElement("a");
+link.href=URL.createObjectURL(blob);
+link.download=pos+".csv";
+link.click();
+};
+container.appendChild(btn);
+});
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", ()=>{
+  const login = document.getElementById("login-section");
+  const dashboard = document.getElementById("dashboard");
+  if(localStorage.getItem("loggedIn")){
+    if(login) login.style.display="none";
+    if(dashboard) dashboard.style.display="block";
+  }
+});
+</script>
+</body>
+</html>

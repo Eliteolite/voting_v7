@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vote</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>NTIC - KANO</h1>
+  <p>SRC Voting Portal</p>
+</header>
+
+<div class="header">
+<h1>NTIC - KANO</h1>
+<p>Cast Your Vote</p>
+</div>
+<div class="card" id="votingCard"></div>
+<script>
+const positions = {"SRC Co-Leader": ["Kubura Mustapha", "Fatima Auwal Adam Sani", "Bilkisu Murtala"], "SRC Assist. Co-Leader": ["Rihanna Ahmad Abdulwahab", "Zainab Ismail Mai-Adamu", "Cindy Fechi Ohuruzo"], "Well-being Ambassador": ["Mufidah Nababa", "Ameerah Morenike Ibrahim", "Fatima Mai Hamza"], "SRC Secretary": ["Bilkisu Dauda Suleiman", "Fatima Mamman Farafara", "Fatima Tsofo", "Amatullah Lawal", "Halima Abdulqadir"], "Event Organizer": ["Yesmin Sadiq Bello", "Aisha Musta Ahmad", "Silakasi Nama Joshua", "Safiyta Bello Maiwada"], "Sports Captain": ["Favour Enewo Jimoh"], "Library Assistant": ["Zainab Mustapha", "Naila Sani", "Khadija Girgir", "Aisha Aliyu Musa"], "Hostel Coordinator": ["Asma'u Bala Getso", "Amina Amina Uzairu", "Ummu Salma Kabir Lawal"], "Dining Hall Coordinator": ["Candidate A", "Candidate B", "Candidate C"], "School Ameerah": ["Aisha Bilyameen Gebe", "Amatur-Rahman Abdulqadir"], "School Sister": ["Candidate X", "Candidate Y"]};
+let positionKeys = Object.keys(positions);
+let currentIndex = 0;
+let selections = {};
+
+function renderPosition(){
+let pos = positionKeys[currentIndex];
+let html = `<h2>${pos}</h2>`;
+positions[pos].forEach(name=>{
+html += `<div class="option">
+<input type="radio" name="candidate" value="${name}">
+<label>${name}</label>
+</div>`;
+});
+html += `<button onclick="next()">Next</button>`;
+document.getElementById("votingCard").innerHTML = html;
+}
+
+function next(){
+let selected=document.querySelector('input[name="candidate"]:checked');
+if(!selected){alert("Select candidate");return;}
+selections[positionKeys[currentIndex]]=selected.value;
+currentIndex++;
+if(currentIndex<positionKeys.length){renderPosition();}
+else{localStorage.setItem("selections",JSON.stringify(selections));
+window.location.href="confirm.html";}
+}
+renderPosition();
+</script>
+
+<footer>
+  © 2026 NTIC-KANO. All rights reserved
+</footer>
+
+
+<div class="progress-bar"><div class="progress" id="progress"></div></div>
+<script>
+let progress = document.getElementById('progress');
+let width = 0;
+let interval = setInterval(()=>{
+  if(width>=100) clearInterval(interval);
+  else {
+    width+=10;
+    progress.style.width = width+'%';
+  }
+},200);
+</script>
+</body>
+</html>
