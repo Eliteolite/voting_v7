@@ -5,11 +5,6 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>NTIC - KANO</h1>
-  <p>SRC Voting Portal</p>
-</header>
-
 <div class="header">
 <h1>NTIC - KANO</h1>
 <p>Cast Your Vote</p>
@@ -44,24 +39,6 @@ else{localStorage.setItem("selections",JSON.stringify(selections));
 window.location.href="confirm.html";}
 }
 renderPosition();
-</script>
-
-<footer>
-  © 2026 NTIC-KANO. All rights reserved
-</footer>
-
-
-<div class="progress-bar"><div class="progress" id="progress"></div></div>
-<script>
-let progress = document.getElementById('progress');
-let width = 0;
-let interval = setInterval(()=>{
-  if(width>=100) clearInterval(interval);
-  else {
-    width+=10;
-    progress.style.width = width+'%';
-  }
-},200);
 </script>
 </body>
 </html>
