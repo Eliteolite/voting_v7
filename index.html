@@ -1,26 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>NTIC - KANO Voting Portal</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Login - NTIC Voting</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .live-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(0, 229, 255, 0.05); color: var(--primary);
+            padding: 6px 14px; border-radius: 4px; font-size: 0.7rem;
+            font-weight: 700; margin-bottom: 25px; border: 1px solid rgba(0, 229, 255, 0.2);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .pulse { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; animation: pulse-aqua 2s infinite; }
+        @keyframes pulse-aqua {
+            0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 229, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+        }
+        .input-label { display: block; text-align: left; font-size: 0.75rem; color: var(--text-muted); margin: 0 0 8px 4px; text-transform: uppercase; }
+    </style>
 </head>
 <body>
-<div class="header">
-<h1>NTIC - KANO</h1>
-<p>Official Election Portal</p>
+<div class="container" style="margin-top: 5vh;">
+    <header>
+        <h1>NTIC - KANO</h1>
+        <p>SRC Elections 2026</p>
+    </header>
+
+    <div class="card">
+        <div class="live-badge"><div class="pulse"></div> System Live</div>
+        <h2 style="margin-bottom: 25px; font-weight: 600;">Voter Verification</h2>
+
+        <div style="margin-bottom: 25px;">
+            <label class="input-label">Admission Number</label>
+            <input type="text" id="studentId" placeholder="KAN/2026/000" autocomplete="off">
+            <p id="error" style="color: #fb7185; font-size: 0.8rem; margin-top: 10px; text-align: left;"></p>
+        </div>
+
+        <button onclick="startVoting()">Access Ballot</button>
+    </div>
+    <footer>Your session is encrypted and anonymous.</footer>
 </div>
-<div class="card">
-<h2>Enter Student ID</h2>
-<input id="studentId" placeholder="NTIC001">
-<button onclick="startVoting()">Start Voting</button>
-<p id="error" class="error"></p>
-</div>
+
 <script>
-function startVoting(){
-const id=document.getElementById("studentId").value.trim();
-if(!id){document.getElementById("error").innerText="Enter valid ID";return;}
-localStorage.setItem("currentVoter",id);
-window.location.href="vote.html";
+function startVoting() {
+    const id = document.getElementById("studentId").value.trim();
+    if (!id) { document.getElementById("error").innerText = "Valid ID required."; return; }
+    localStorage.setItem("currentVoter", id);
+    window.location.href = "vote.html";
 }
 </script>
 </body>

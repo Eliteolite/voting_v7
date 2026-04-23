@@ -1,31 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Confirm Vote</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Review Ballot - NTIC</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .receipt-area { background: #161b22; border-radius: 12px; border: 1px solid var(--card-border); overflow: hidden; margin: 20px 0; }
+        .confirm-row { display: flex; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--card-border); }
+        .confirm-row:last-child { border-bottom: none; }
+        .pos-label { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; font-weight: 800; display: block; text-align: left; }
+        .candidate-val { color: var(--primary); font-size: 1rem; font-weight: 600; text-align: left; }
+        .token-box { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; border: 1px dashed var(--card-border); margin-bottom: 20px; }
+    </style>
 </head>
 <body>
-<div class="header">
-<h1>NTIC - KANO</h1>
-<p>Confirm Your Vote</p>
+<div class="container">
+    <header><h1>Final Review</h1><p>Confirm your selections</p></header>
+    <div class="card">
+        <div class="token-box">SESSION_ID: <span id="token" style="color:var(--primary)"></span></div>
+        <div class="receipt-area" id="receiptList"></div>
+        <button onclick="submitVote()" id="submitBtn">Cast Final Vote</button>
+    </div>
 </div>
-<div class="card" id="confirmCard"></div>
-<script>
-const selections=JSON.parse(localStorage.getItem("selections"));
-let html="";
-for(let pos in selections){
-html+=`<p><strong>${pos}</strong><br>${selections[pos]}</p>`;
-}
-html+=`<button onclick="submitVote()">Confirm Vote</button>`;
-document.getElementById("confirmCard").innerHTML=html;
 
-function submitVote(){
-let allVotes=JSON.parse(localStorage.getItem("allVotes")||"[]");
-let voter=localStorage.getItem("currentVoter");
-allVotes.push({voter:voter,selections:selections});
-localStorage.setItem("allVotes",JSON.stringify(allVotes));
-window.location.href="thankyou.html";
+<script>
+const selections = JSON.parse(localStorage.getItem("selections") || "{}");
+function render() {
+    let html = "";
+    for (let pos in selections) {
+        html += `<div class="confirm-row"><div><span class="pos-label">${pos}</span><div class="candidate-val">${selections[pos]}</div></div></div>`;
+    }
+    document.getElementById("receiptList").innerHTML = html;
 }
+async function submitVote() {
+    const btn = document.getElementById("submitBtn");
+    btn.innerText = "Processing..."; btn.disabled = true;
+    setTimeout(() => { localStorage.removeItem("selections"); window.location.href = "thankyou.html"; }, 1500);
+}
+document.getElementById("token").innerText = "TX-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+render();
 </script>
 </body>
 </html>

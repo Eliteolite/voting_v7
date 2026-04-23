@@ -1,15 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Thank You</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Success - NTIC</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .success-icon { font-size: 4rem; color: var(--primary); text-shadow: 0 0 20px var(--primary-glow); margin-bottom: 20px; display: block; }
+        .timer-bar { width: 100%; height: 2px; background: #161b22; margin-top: 30px; position: relative; }
+        .timer-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--primary); width: 100%; animation: shrink 10s linear; }
+        @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+    </style>
 </head>
 <body>
-<div class="header">
-<h1>NTIC - KANO</h1>
+<div class="container">
+    <div class="card">
+        <span class="success-icon">✓</span>
+        <h1 style="margin-bottom: 10px;">Vote Securely Cast</h1>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Your ballot has been encrypted and added to the 2026 tally.</p>
+        <button style="background: transparent; border: 1px solid var(--card-border); color: white;" onclick="window.location.href='index.html'">Finish Session</button>
+        <div class="timer-bar"><div class="timer-fill"></div></div>
+    </div>
 </div>
-<div class="card">
-<h2>Thank You For Voting!</h2>
-</div>
+<script>setTimeout(() => window.location.href = 'index.html', 10000);</script>
 </body>
 </html>

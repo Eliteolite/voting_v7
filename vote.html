@@ -1,43 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Vote</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Vote - NTIC Elections</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="header">
-<h1>NTIC - KANO</h1>
-<p>Cast Your Vote</p>
+<div class="container">
+    <header>
+        <h1>NTIC - KANO</h1>
+        <p>Official SRC Election Portal</p>
+    </header>
+
+    <div class="card" id="votingCard">
+        </div>
+
+    <footer>© 2026 NTIC-KANO SRC Elections</footer>
 </div>
-<div class="card" id="votingCard"></div>
+
 <script>
-const positions = {"SRC Co-Leader": ["Kubura Mustapha", "Fatima Auwal Adam Sani", "Bilkisu Murtala"], "SRC Assist. Co-Leader": ["Rihanna Ahmad Abdulwahab", "Zainab Ismail Mai-Adamu", "Cindy Fechi Ohuruzo"], "Well-being Ambassador": ["Mufidah Nababa", "Ameerah Morenike Ibrahim", "Fatima Mai Hamza"], "SRC Secretary": ["Bilkisu Dauda Suleiman", "Fatima Mamman Farafara", "Fatima Tsofo", "Amatullah Lawal", "Halima Abdulqadir"], "Event Organizer": ["Yesmin Sadiq Bello", "Aisha Musta Ahmad", "Silakasi Nama Joshua", "Safiyta Bello Maiwada"], "Sports Captain": ["Favour Enewo Jimoh"], "Library Assistant": ["Zainab Mustapha", "Naila Sani", "Khadija Girgir", "Aisha Aliyu Musa"], "Hostel Coordinator": ["Asma'u Bala Getso", "Amina Amina Uzairu", "Ummu Salma Kabir Lawal"], "Dining Hall Coordinator": ["Candidate A", "Candidate B", "Candidate C"], "School Ameerah": ["Aisha Bilyameen Gebe", "Amatur-Rahman Abdulqadir"], "School Sister": ["Candidate X", "Candidate Y"]};
-let positionKeys = Object.keys(positions);
+const positions = {
+    "SRC Co-Leader": ["Kubura Mustapha", "Fatima Auwal Adam Sani", "Bilkisu Murtala"],
+    "SRC Assist. Co-Leader": ["Rihanna Ahmad Abdulwahab", "Zainab Ismail Mai-Adamu", "Cindy Fechi Ohuruzo"],
+    "Well-being Ambassador": ["Mufidah Nababa", "Ameerah Morenike Ibrahim", "Fatima Mai Hamza"],
+    "SRC Secretary": ["Bilkisu Dauda Suleiman", "Fatima Mamman Farafara", "Fatima Tsofo", "Amatullah Lawal", "Halima Abdulqadir"],
+    "Event Organizer": ["Yesmin Sadiq Bello", "Aisha Musta Ahmad", "Silakasi Nama Joshua", "Safiyta Bello Maiwada"],
+    "Sports Captain": ["Favour Enewo Jimoh"],
+    "Library Assistant": ["Zainab Mustapha", "Naila Sani", "Khadija Girgir", "Aisha Aliyu Musa"],
+    "Hostel Coordinator": ["Asma'u Bala Getso", "Amina Amina Uzairu", "Ummu Salma Kabir Lawal"],
+    "Dining Hall Coordinator": ["TBD 1", "TBD 2"],
+    "School Ameerah": ["Aisha Bilyameen Gebe", "Amatur-Rahman Abdulqadir"],
+    "School Sister": ["TBD 1", "TBD 2"]
+};
+
+const positionKeys = Object.keys(positions);
 let currentIndex = 0;
-let selections = {};
+let selections = JSON.parse(localStorage.getItem("selections") || "{}");
 
-function renderPosition(){
-let pos = positionKeys[currentIndex];
-let html = `<h2>${pos}</h2>`;
-positions[pos].forEach(name=>{
-html += `<div class="option">
-<input type="radio" name="candidate" value="${name}">
-<label>${name}</label>
-</div>`;
-});
-html += `<button onclick="next()">Next</button>`;
-document.getElementById("votingCard").innerHTML = html;
+const jumpTo = localStorage.getItem("jumpToPosition");
+const isSingleEdit = localStorage.getItem("singleEditMode") === "true";
+
+if (jumpTo && positionKeys.includes(jumpTo)) {
+    currentIndex = positionKeys.indexOf(jumpTo);
 }
 
-function next(){
-let selected=document.querySelector('input[name="candidate"]:checked');
-if(!selected){alert("Select candidate");return;}
-selections[positionKeys[currentIndex]]=selected.value;
-currentIndex++;
-if(currentIndex<positionKeys.length){renderPosition();}
-else{localStorage.setItem("selections",JSON.stringify(selections));
-window.location.href="confirm.html";}
+function renderPosition() {
+    const currentPos = positionKeys[currentIndex];
+    const progressPercent = Math.round(((currentIndex) / positionKeys.length) * 100);
+    
+    let html = `
+        <div style="margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+                <span>${isSingleEdit ? 'Editing Position' : 'Progress'}</span>
+                <span>${currentIndex + 1} of ${positionKeys.length}</span>
+            </div>
+            <div style="width: 100%; background: #1e293b; height: 6px; border-radius: 10px; overflow: hidden;">
+                <div style="width: ${progressPercent}%; background: var(--primary); height: 100%;"></div>
+            </div>
+        </div>
+        
+        <h2 style="text-align: left; margin-bottom: 20px;">${currentPos}</h2>
+    `;
+
+    positions[currentPos].forEach(name => {
+        const isChecked = (selections[currentPos] === name) ? "checked" : "";
+        html += `
+        <label class="option">
+            <span style="font-size: 1.1rem; font-weight: 500;">${name}</span>
+            <input type="radio" name="candidate" value="${name}" ${isChecked}>
+        </label>`;
+    });
+
+    const btnText = isSingleEdit ? "Save & Return" : (currentIndex === positionKeys.length - 1 ? "Review Ballot" : "Continue");
+    
+    html += `<button onclick="next()" style="margin-top: 20px;">${btnText}</button>`;
+    document.getElementById("votingCard").innerHTML = html;
 }
+
+function next() {
+    const selected = document.querySelector('input[name="candidate"]:checked');
+    if (!selected) { alert("Selection required."); return; }
+    
+    selections[positionKeys[currentIndex]] = selected.value;
+    localStorage.setItem("selections", JSON.stringify(selections));
+
+    if (isSingleEdit) {
+        localStorage.removeItem("singleEditMode");
+        localStorage.removeItem("jumpToPosition");
+        window.location.href = "confirm.html"; 
+    } else {
+        currentIndex++;
+        if (currentIndex < positionKeys.length) {
+            renderPosition();
+        } else {
+            window.location.href = "confirm.html";
+        }
+    }
+}
+
 renderPosition();
 </script>
 </body>
