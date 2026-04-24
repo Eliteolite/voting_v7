@@ -5,7 +5,7 @@
     <title>Vote - NTIC Elections</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Styling for the new button layout */
+        /* Layout for the dual-button navigation */
         .nav-controls {
             display: flex;
             gap: 15px;
@@ -90,15 +90,15 @@ function renderPosition() {
         </label>`;
     });
 
-    // Navigation Controls
     html += `<div class="nav-controls">`;
     
-    // Back button logic: hide if on first page or in single edit mode
+    // Previous Button: hide on first index or during single edit
     if (currentIndex > 0 && !isSingleEdit) {
-        html += `<button onclick="prev()" class="btn-secondary">Back</button>`;
+        html += `<button onclick="prev()" class="btn-secondary">Previous</button>`;
     }
 
-    const btnText = isSingleEdit ? "Save & Return" : (currentIndex === positionKeys.length - 1 ? "Review Ballot" : "Continue");
+    // Next Button: label changes based on state
+    const btnText = isSingleEdit ? "Save & Return" : (currentIndex === positionKeys.length - 1 ? "Review Ballot" : "Next");
     html += `<button onclick="next()">${btnText}</button>`;
     
     html += `</div>`;
@@ -109,7 +109,7 @@ function renderPosition() {
 function next() {
     const selected = document.querySelector('input[name="candidate"]:checked');
     if (!selected) { 
-        alert("Please select a candidate before continuing."); 
+        alert("Selection required."); 
         return; 
     }
     
@@ -132,7 +132,7 @@ function next() {
 
 function prev() {
     if (currentIndex > 0) {
-        // Optional: Save current selection if they've picked something before going back
+        // Save current selection before moving back so it's not lost
         const selected = document.querySelector('input[name="candidate"]:checked');
         if (selected) {
             selections[positionKeys[currentIndex]] = selected.value;
