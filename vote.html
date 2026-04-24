@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <title>Vote - NTIC Elections</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styling for the new button layout */
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -12,7 +31,8 @@
         <p>Official SRC Election Portal</p>
     </header>
 
-    <div class="card" id="votingCard"></div>
+    <div class="card" id="votingCard">
+        </div>
 
     <footer>© 2026 NTIC-KANO SRC Elections</footer>
 </div>
@@ -35,56 +55,95 @@ const positions = {
 const positionKeys = Object.keys(positions);
 let currentIndex = 0;
 let selections = JSON.parse(localStorage.getItem("selections") || "{}");
+
 const jumpTo = localStorage.getItem("jumpToPosition");
 const isSingleEdit = localStorage.getItem("singleEditMode") === "true";
 
-if (jumpTo && positionKeys.includes(jumpTo)) currentIndex = positionKeys.indexOf(jumpTo);
+if (jumpTo && positionKeys.includes(jumpTo)) {
+    currentIndex = positionKeys.indexOf(jumpTo);
+}
 
 function renderPosition() {
     const currentPos = positionKeys[currentIndex];
-    const progressPercent = Math.round(((currentIndex + 1) / positionKeys.length) * 100);
+    const progressPercent = Math.round(((currentIndex) / positionKeys.length) * 100);
     
     let html = `
-        <div style="margin-bottom: 30px;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; text-transform: uppercase;">
-                <span>${currentPos}</span>
-                <span style="color: var(--primary)">${progressPercent}% Complete</span>
+        <div style="margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+                <span>${isSingleEdit ? 'Editing Position' : 'Progress'}</span>
+                <span>${currentIndex + 1} of ${positionKeys.length}</span>
             </div>
-            <div style="width: 100%; background: #161b22; height: 4px; border-radius: 10px; overflow: hidden;">
-                <div style="width: ${progressPercent}%; background: var(--primary); height: 100%; box-shadow: 0 0 10px var(--primary-glow);"></div>
+            <div style="width: 100%; background: #1e293b; height: 6px; border-radius: 10px; overflow: hidden;">
+                <div style="width: ${progressPercent}%; background: var(--primary); height: 100%;"></div>
             </div>
         </div>
-        <h2 style="text-align: left; margin-bottom: 20px; font-size: 1.4rem;">Select Candidate</h2>
+        
+        <h2 style="text-align: left; margin-bottom: 20px;">${currentPos}</h2>
     `;
 
     positions[currentPos].forEach(name => {
         const isChecked = (selections[currentPos] === name) ? "checked" : "";
         html += `
         <label class="option">
-            <span style="font-size: 1rem; font-weight: 500;">${name}</span>
+            <span style="font-size: 1.1rem; font-weight: 500;">${name}</span>
             <input type="radio" name="candidate" value="${name}" ${isChecked}>
         </label>`;
     });
 
-    const btnText = isSingleEdit ? "Save & Return" : (currentIndex === positionKeys.length - 1 ? "Review Ballot" : "Next Position");
-    html += `<button onclick="next()" style="margin-top: 20px;">${btnText}</button>`;
+    // Navigation Controls
+    html += `<div class="nav-controls">`;
+    
+    // Back button logic: hide if on first page or in single edit mode
+    if (currentIndex > 0 && !isSingleEdit) {
+        html += `<button onclick="prev()" class="btn-secondary">Back</button>`;
+    }
+
+    const btnText = isSingleEdit ? "Save & Return" : (currentIndex === positionKeys.length - 1 ? "Review Ballot" : "Continue");
+    html += `<button onclick="next()">${btnText}</button>`;
+    
+    html += `</div>`;
+    
     document.getElementById("votingCard").innerHTML = html;
 }
 
 function next() {
     const selected = document.querySelector('input[name="candidate"]:checked');
-    if (!selected) { alert("Please make a selection."); return; }
+    if (!selected) { 
+        alert("Please select a candidate before continuing."); 
+        return; 
+    }
+    
     selections[positionKeys[currentIndex]] = selected.value;
     localStorage.setItem("selections", JSON.stringify(selections));
+
     if (isSingleEdit) {
         localStorage.removeItem("singleEditMode");
         localStorage.removeItem("jumpToPosition");
         window.location.href = "confirm.html"; 
     } else {
         currentIndex++;
-        currentIndex < positionKeys.length ? renderPosition() : window.location.href = "confirm.html";
+        if (currentIndex < positionKeys.length) {
+            renderPosition();
+        } else {
+            window.location.href = "confirm.html";
+        }
     }
 }
+
+function prev() {
+    if (currentIndex > 0) {
+        // Optional: Save current selection if they've picked something before going back
+        const selected = document.querySelector('input[name="candidate"]:checked');
+        if (selected) {
+            selections[positionKeys[currentIndex]] = selected.value;
+            localStorage.setItem("selections", JSON.stringify(selections));
+        }
+
+        currentIndex--;
+        renderPosition();
+    }
+}
+
 renderPosition();
 </script>
 </body>
