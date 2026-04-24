@@ -7,21 +7,46 @@
     <style>
         .ballot-header {
             display: flex; justify-content: space-between; align-items: center;
-            background: #161b22; padding: 12px 20px;
-            border-radius: 8px; margin-bottom: 24px; border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03); padding: 12px 20px;
+            border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.05);
         }
+        .ballot-id { font-family: monospace; color: var(--primary); font-weight: bold; }
+
+        .receipt-area {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
         .confirm-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 0; border-bottom: 1px solid var(--border-color);
+            padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 4px solid transparent; transition: all 0.2s;
         }
-        .pos-label { color: var(--text-muted); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .candidate-val { color: var(--primary); font-size: 1rem; font-weight: 600; }
-        .edit-link { color: var(--text-muted); font-size: 0.75rem; text-decoration: none; cursor: pointer; }
-        .edit-link:hover { color: var(--primary); }
+        .confirm-row:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+        .confirm-row:hover { border-left: 4px solid var(--primary); background: rgba(56, 189, 248, 0.05); }
+        
+        .pos-info { text-align: left; flex: 1; }
+        .pos-label { color: var(--text-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .candidate-val { color: var(--primary); font-size: 1.1rem; font-weight: 600; }
+
+        .edit-btn {
+            background: rgba(255, 255, 255, 0.05); color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 14px;
+            border-radius: 6px; font-size: 0.75rem; cursor: pointer; width: auto;
+        }
+        .edit-btn:hover { background: var(--text-main); color: var(--bg-dark); }
+
+        .final-warning {
+            background: rgba(251, 113, 133, 0.1); border: 1px solid rgba(251, 113, 133, 0.2);
+            color: #fb7185; padding: 15px; border-radius: 12px; font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
-<div class="container">
+<div class="container" style="max-width: 650px;">
     <header>
         <h1>NTIC - KANO</h1>
         <p>Review Your Selection</p>
@@ -29,59 +54,69 @@
 
     <div class="card">
         <div class="ballot-header">
-            <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700;">TRANSACTION ID</span>
-            <span id="ballotToken" style="font-family: monospace; color: var(--primary); font-weight: bold;"></span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">VOTER SESSION TOKEN:</span>
+            <span class="ballot-id" id="ballotToken">GENERATING...</span>
         </div>
 
-        <div id="receiptList" style="margin-bottom: 30px;"></div>
-        
-        <div style="background: rgba(251, 113, 133, 0.1); border: 1px solid rgba(251, 113, 133, 0.2); color: #fb7185; padding: 14px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 24px; text-align: left;">
-            ⚠️ This action is permanent. Once cast, your vote cannot be changed.
-        </div>
+        <div class="receipt-area" id="receiptList"></div>
 
-        <button onclick="submitVote()" id="submitBtn">Cast My Final Vote</button>
+        <div class="final-warning">⚠️ Note: Once submitted, your choices are final.</div>
+
+        <button onclick="submitVote()" id="submitBtn" style="margin-top: 25px;">Cast My Final Vote</button>
     </div>
 </div>
 
 <script>
 const selections = JSON.parse(localStorage.getItem("selections") || "{}");
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwkCp9J4GfAKK2GAyXKBo9suNhrL69ycyiq1dvDZ8iRY2WcTWrJ9ViGI9fJsGsQFVeT9Q/exec";
+
 function renderReceipt() {
     let html = "";
     for (let pos in selections) {
         html += `
         <div class="confirm-row">
-            <div style="text-align: left;">
-                <div class="pos-label">${pos}</div>
+            <div class="pos-info">
+                <span class="pos-label">${pos}</span>
                 <div class="candidate-val">${selections[pos]}</div>
             </div>
-            <a class="edit-link" onclick="goToEdit('${pos}')">Edit</a>
+            <div class="action-area">
+                <button class="edit-btn" onclick="goToEdit('${pos}')">Change</button>
+            </div>
         </div>`;
     }
     document.getElementById("receiptList").innerHTML = html;
 }
+
 function goToEdit(posName) {
     localStorage.setItem("jumpToPosition", posName);
     localStorage.setItem("singleEditMode", "true"); 
     window.location.href = "vote.html";
 }
+
 async function submitVote() {
     const btn = document.getElementById("submitBtn");
-    btn.innerText = "Processing Encryption...";
+    btn.innerText = "Encrypting & Submitting...";
     btn.disabled = true;
+
     try {
-        await fetch("YOUR_GOOGLE_SCRIPT_URL", {
+        await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST", mode: "no-cors",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ voter: localStorage.getItem("currentVoter") || "Anon", selections: selections })
+            body: JSON.stringify({
+                voter: localStorage.getItem("currentVoter") || "Anonymous",
+                selections: selections
+            })
         });
+
         localStorage.removeItem("selections");
         window.location.href = "thankyou.html";
     } catch (e) {
-        alert("Connection error.");
+        alert("Submission failed. Check connection.");
         btn.disabled = false;
         btn.innerText = "Cast My Final Vote";
     }
 }
+
 document.getElementById("ballotToken").innerText = "TX-" + Math.random().toString(36).substr(2, 6).toUpperCase();
 renderReceipt();
 </script>

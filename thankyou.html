@@ -2,36 +2,170 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Success - NTIC</title>
+    <title>Thank You - NTIC</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .check-circle { font-size: 4rem; color: #00ff88; margin-bottom: 20px; }
-        .success-box { background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.1); padding: 20px; border-radius: 8px; margin: 30px 0; }
+        .thank-you-card {
+            padding: 60px 40px;
+            text-align: center;
+            margin-top: 10vh;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #34d399;
+            margin-bottom: 30px;
+            display: block;
+            animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .sub-text {
+            font-weight: 300;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            max-width: 400px;
+            margin: 0 auto 40px;
+        }
+
+        .countdown-container {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        #seconds {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .timer-bar {
+            width: 100%;
+            max-width: 300px;
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            margin: 15px auto 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .home-btn {
+            display: inline-block;
+            width: auto;
+            min-width: 200px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            margin-top: 20px;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .home-btn:hover {
+            background: var(--primary);
+            color: #020617;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="card" style="text-align: center;">
-        <div class="check-circle">✓</div>
-        <h1>Vote Recorded</h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Your ballot has been securely submitted to the SRC Election database.</p>
+    <div class="card thank-you-card">
+        <span class="success-icon">✓</span>
+        
+        <h1>Vote Recorded!</h1>
+        
+        <p class="sub-text">
+            Your ballot has been successfully encrypted and added to the official tally for the 2026 SRC Elections.
+        </p>
 
-        <div class="success-box">
-            <p style="font-size: 0.75rem; color: #00ff88; font-weight: 800; text-transform: uppercase;">Identity Secure</p>
-            <p style="font-size: 0.85rem; margin-top: 5px;">Your session has been terminated for your privacy.</p>
+        <div style="background: rgba(56, 189, 248, 0.03); padding: 20px; border-radius: 12px; border: 1px dashed rgba(56, 189, 248, 0.2);">
+            <p style="font-size: 0.8rem; color: var(--primary); text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Session Status</p>
+            <p style="font-size: 0.9rem; margin-top: 5px;">Your identity has been logged out for security.</p>
         </div>
 
-        <button onclick="window.location.href='index.html'" style="background: transparent; border: 1px solid var(--border-color); color: white;">Return to Home</button>
-        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 24px;">Auto-redirecting in <span id="seconds" style="color: var(--primary);">10</span>s</p>
+        <button class="home-btn" onclick="window.location.href='index.html'">Return to Home Now</button>
+
+        <div class="countdown-container">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Auto-redirecting in <span id="seconds">10</span> seconds
+            </p>
+            <div class="timer-bar">
+                <div class="timer-fill" style="animation-duration: 10s;"></div>
+            </div>
+        </div>
     </div>
+
+    <footer style="margin-top: 60px;">© 2026 NTIC-KANO SRC Elections</footer>
 </div>
+
 <script>
-    let t = 10;
-    setInterval(() => {
-        t--;
-        document.getElementById('seconds').innerText = t;
-        if(t <= 0) window.location.href = 'index.html';
+    // Timer Logic
+    let timeLeft = 10;
+    const timerElement = document.getElementById('seconds');
+    const countdown = setInterval(() => {
+        timeLeft--;
+        timerElement.innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            window.location.href = 'index.html';
+        }
     }, 1000);
+
+    // Celebration Confetti Logic
+    function launchConfetti() {
+        for(let i=0; i<80; i++) {
+            let div = document.createElement('div');
+            div.style.position = 'fixed';
+            div.style.width = Math.random() * 8 + 4 + 'px';
+            div.style.height = div.style.width;
+            div.style.background = 'hsl(' + Math.random() * 360 + ', 100%, 50%)';
+            div.style.top = '-20px';
+            div.style.left = Math.random() * 100 + '%';
+            div.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            div.style.zIndex = '9999';
+            div.style.pointerEvents = 'none';
+            document.body.appendChild(div);
+
+            let speed = Math.random() * 4 + 3;
+            let sideWay = (Math.random() - 0.5) * 6;
+            let rotation = Math.random() * 360;
+
+            function fall() {
+                let top = parseFloat(div.style.top);
+                let left = parseFloat(div.style.left);
+                if (top < window.innerHeight) {
+                    div.style.top = (top + speed) + 'px';
+                    div.style.left = (left + sideWay) + 'px';
+                    div.style.transform = `rotate(${rotation}deg)`;
+                    rotation += 5;
+                    requestAnimationFrame(fall);
+                } else {
+                    div.remove();
+                }
+            }
+            fall();
+        }
+    }
+
+    // Launch confetti on load
+    window.onload = launchConfetti;
 </script>
 </body>
 </html>

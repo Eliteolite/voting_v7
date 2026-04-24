@@ -2,86 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - NTIC</title>
+    <title>Admin Dashboard - NTIC</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .container { max-width: 900px; }
-        .summary-table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 20px; }
-        .summary-table th { padding: 15px; background: #161b22; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; border-radius: 4px; }
-        .summary-table td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
-        .accordion-item { background: #161b22; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border-color); overflow: hidden; }
-        .accordion-header { padding: 15px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .accordion-content { display: none; padding: 20px; background: #05070a; border-top: 1px solid var(--border-color); }
-        .badge { background: rgba(0, 204, 255, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 4px; font-weight: bold; border: 1px solid var(--primary); font-size: 0.8rem; }
+        .admin-grid { display: grid; gap: 20px; text-align: left; }
+        .summary-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .summary-table th, .summary-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .summary-table th { color: var(--primary); font-size: 0.8rem; text-transform: uppercase; }
+        
+        .accordion-item { background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .accordion-header { padding: 15px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
+        .accordion-header:hover { background: rgba(255,255,255,0.08); }
+        .accordion-content { display: none; padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); background: #0f172a; }
+        
+        .badge { background: var(--primary); color: #020617; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .export-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); font-size: 0.8rem; padding: 8px 15px; width: auto; margin-top: 10px; }
     </style>
 </head>
 <body>
-<div class="container">
+<div class="container" style="max-width: 1000px;">
     <header>
-        <h1>Election Dashboard</h1>
-        <p>Live Statistics & Results</p>
+        <h1>NTIC Admin Panel</h1>
+        <p>Election Results & Data Visualization</p>
     </header>
 
     <div class="card" id="login-section">
-        <h3 style="margin-bottom: 20px;">Administrator Access</h3>
-        <input type="password" id="pass" placeholder="Password" style="margin-bottom: 15px;">
-        <button onclick="login()">Enter Dashboard</button>
+        <h2>Security Check</h2>
+        <input type="password" id="pass" placeholder="Enter Admin Password">
+        <button onclick="login()">Access Records</button>
     </div>
 
-    <div id="dashboard" style="display: none;">
+    <div id="dashboard" style="display: none;" class="admin-grid">
+        
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 1rem;">Leaderboard Summary</h3>
-                <button onclick="exportFullCSV()" style="width: auto; padding: 8px 16px; font-size: 0.75rem; background: transparent; border: 1px solid var(--primary); color: var(--primary);">Export CSV</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Current Leaderboard</h3>
+                <button class="export-btn" onclick="exportFullCSV()">Download All Data (CSV)</button>
             </div>
             <table class="summary-table">
-                <thead><tr><th>Position</th><th>Leader</th><th>Tally</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Leading Candidate</th>
+                        <th>Votes</th>
+                    </tr>
+                </thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
 
-        <div id="accordion-container" style="margin-top: 30px;"></div>
+        <div class="card">
+            <h3>Detailed Breakdown</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">Click a position to view the vote distribution chart.</p>
+            <div id="accordion-container"></div>
+        </div>
+
     </div>
+
+    <footer>© 2026 NTIC-KANO SRC Elections</footer>
 </div>
 
 <script>
 const ADMIN_PASS = "admin123";
+
 function login() {
     if(document.getElementById("pass").value === ADMIN_PASS) {
         document.getElementById("login-section").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
+        document.getElementById("dashboard").style.display = "grid";
         loadStats();
-    } else { alert("Unauthorized"); }
+    } else {
+        alert("Incorrect password");
+    }
 }
 
 function loadStats() {
     const votes = JSON.parse(localStorage.getItem("allVotes") || "[]");
     if(votes.length === 0) return;
+
     const positions = Object.keys(votes[0].selections);
     const leaderboardBody = document.getElementById("leaderboard-body");
     const accordionContainer = document.getElementById("accordion-container");
 
     positions.forEach(pos => {
+        // Calculate counts
         let counts = {};
-        votes.forEach(v => { let choice = v.selections[pos]; counts[choice] = (counts[choice] || 0) + 1; });
+        votes.forEach(v => {
+            let choice = v.selections[pos];
+            counts[choice] = (counts[choice] || 0) + 1;
+        });
+
+        // Find Winner
         let winner = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
         
-        leaderboardBody.innerHTML += `<tr><td>${pos}</td><td><strong>${winner}</strong></td><td><span class="badge">${counts[winner]}</span></td></tr>`;
+        // Fill Leaderboard
+        let row = `<tr>
+            <td>${pos}</td>
+            <td><strong>${winner}</strong></td>
+            <td><span class="badge">${counts[winner]}</span></td>
+        </tr>`;
+        leaderboardBody.innerHTML += row;
 
+        // Create Accordion Item
         let item = document.createElement("div");
         item.className = "accordion-item";
-        item.innerHTML = `<div class="accordion-header" onclick="toggleAccordion(this)"><span>${pos}</span><span style="color:var(--primary)">+</span></div>
-            <div class="accordion-content"><canvas id="chart-${pos.replace(/\s+/g, '')}"></canvas></div>`;
+        item.innerHTML = `
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>${pos}</span>
+                <span style="color: var(--primary)">+</span>
+            </div>
+            <div class="accordion-content">
+                <canvas id="chart-${pos.replace(/\s+/g, '')}"></canvas>
+            </div>
+        `;
         accordionContainer.appendChild(item);
 
+        // Render Chart
         new Chart(document.getElementById(`chart-${pos.replace(/\s+/g, '')}`), {
             type: 'doughnut',
             data: {
                 labels: Object.keys(counts),
-                datasets: [{ data: Object.values(counts), backgroundColor: ['#00ccff', '#818cf8', '#fb7185', '#34d399', '#facc15'], borderWidth: 0 }]
+                datasets: [{
+                    data: Object.values(counts),
+                    backgroundColor: ['#38bdf8', '#818cf8', '#fb7185', '#34d399', '#facc15', '#a78bfa'],
+                    borderWidth: 0
+                }]
             },
-            options: { plugins: { legend: { position: 'bottom', labels: { color: '#848d97' } } } }
+            options: {
+                plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Inter' } } } }
+            }
         });
     });
 }
@@ -91,6 +140,23 @@ function toggleAccordion(header) {
     const isVisible = content.style.display === "block";
     content.style.display = isVisible ? "none" : "block";
     header.querySelector('span:last-child').innerText = isVisible ? "+" : "-";
+}
+
+function exportFullCSV() {
+    const votes = JSON.parse(localStorage.getItem("allVotes") || "[]");
+    if(votes.length === 0) return;
+    
+    let csv = "Voter ID," + Object.keys(votes[0].selections).join(",") + "\n";
+    votes.forEach(v => {
+        csv += v.voter + "," + Object.values(v.selections).join(",") + "\n";
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'NTIC_Election_Results.csv');
+    a.click();
 }
 </script>
 </body>
