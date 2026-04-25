@@ -61,6 +61,12 @@ function renderPosition() {
         const isChecked = (selections[currentPos] === name) ? "checked" : "";
         html += `
         <label class="option">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#22c55e);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;">
+                ${name.split(" ").map(n=>n[0]).join("").slice(0,2)}
+            </div>
+            <span style="font-weight:600;">${name}</span>
+        </div>
             <span style="font-size: 1rem; font-weight: 500;">${name}</span>
             <input type="radio" name="candidate" value="${name}" ${isChecked}>
         </label>`;
