@@ -5,34 +5,48 @@
     <title>Success - NTIC</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .check-circle { font-size: 4rem; color: #00ff88; margin-bottom: 20px; }
-        .success-box { background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.1); padding: 20px; border-radius: 8px; margin: 30px 0; }
+        .thank-you-card { padding: 80px 40px; border: 2px solid var(--primary); }
+        .checkmark-circle { width: 80px; height: 80px; background: #34d399; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; font-size: 40px; color: white; box-shadow: 0 0 30px rgba(52, 211, 153, 0.4); }
     </style>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body onload="launchConfetti()">
 <div class="container">
-    <div class="card" style="text-align: center;">
-        <div class="check-circle">✓</div>
-        <h1>Vote Recorded</h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Your ballot has been securely submitted to the SRC Election database.</p>
-
-        <div class="success-box">
-            <p style="font-size: 0.75rem; color: #00ff88; font-weight: 800; text-transform: uppercase;">Identity Secure</p>
-            <p style="font-size: 0.85rem; margin-top: 5px;">Your session has been terminated for your privacy.</p>
-        </div>
-
-        <button onclick="window.location.href='index.html'" style="background: transparent; border: 1px solid var(--border-color); color: white;">Return to Home</button>
-        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 24px;">Auto-redirecting in <span id="seconds" style="color: var(--primary);">10</span>s</p>
+    <div class="card thank-you-card">
+        <div class="checkmark-circle">✓</div>
+        <h1>Vote Cast Successfully!</h1>
+        <p class="sub-text">Thank you for participating in the NTIC-Kano SRC Elections. Your response has been securely synced to the cloud.</p>
+        <button onclick="window.location.href='index.html'" style="background: rgba(255,255,255,0.05); width: auto; padding: 12px 30px;">Back to Home</button>
     </div>
 </div>
+
 <script>
-    let t = 10;
-    setInterval(() => {
-        t--;
-        document.getElementById('seconds').innerText = t;
-        if(t <= 0) window.location.href = 'index.html';
-    }, 1000);
+function launchConfetti() {
+    const colors = ['#38bdf8', '#34d399', '#fb7185', '#facc15', '#a78bfa'];
+    for(let i=0; i<150; i++) {
+        let div = document.createElement('div');
+        div.style.cssText = `
+            position: fixed; width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px;
+            background: ${colors[Math.floor(Math.random()*colors.length)]};
+            top: 100%; left: 50%; z-index: 9999; border-radius: 2px; pointer-events: none;
+        `;
+        document.body.appendChild(div);
+
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 15 + 10;
+        let vx = Math.cos(angle) * velocity;
+        let vy = Math.sin(angle) * velocity - 15;
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight / 1.2;
+
+        function update() {
+            x += vx; y += vy; vy += 0.5; // gravity
+            div.style.transform = `translate(${x - (window.innerWidth/2)}px, ${y - (window.innerHeight/1.2)}px) rotate(${y}deg)`;
+            if (y < window.innerHeight + 100) requestAnimationFrame(update);
+            else div.remove();
+        }
+        requestAnimationFrame(update);
+    }
+}
 </script>
 </body>
 </html>
