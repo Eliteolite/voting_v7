@@ -14,39 +14,62 @@
 </div>
 
 <script>
-// REPLACE WITH YOUR URL
-const SCRIPT_URL = "YOUR_WEB_APP_URL_HERE";
+// Replace the entire <script> section of your admin.html
+const ADMIN_PASS = "admin123";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXOhIa6_b0Ux7-p0LPy7X12lyFIcwfaIF50_moD7mcKp2K-XFZx9ZXYRkueWDwwchu/exec";
 
-async function loadCloudData() {
-    const content = document.getElementById("adminContent");
-    content.innerHTML = "<p>Connecting to Google Cloud...</p>";
+function login() {
+    if(document.getElementById("pass").value === ADMIN_PASS) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("dashboard").style.display = "grid";
+        loadStats(); // Fetches from cloud
+    } else {
+        alert("Incorrect password");
+    }
+}
+
+async function loadStats() {
+    const leaderboardBody = document.getElementById("leaderboard-body");
+    const accordionContainer = document.getElementById("accordion-container");
+    leaderboardBody.innerHTML = "Loading live data...";
 
     try {
         const response = await fetch(`${SCRIPT_URL}?action=getResults`);
         const rows = await response.json();
         
-        const votes = rows.map(r => ({
-            voter: r[1],
-            selections: JSON.parse(r[2])
-        }));
+        // Transform Google Sheet rows into the format your charts expect
+        const votes = rows.map(r => ({ voter: r[1], selections: JSON.parse(r[2]) }));
+        
+        if(votes.length === 0) {
+            leaderboardBody.innerHTML = "No votes recorded yet.";
+            return;
+        }
 
-        // Now your existing chart/summary logic takes over
-        renderSummary(votes);
-        renderCharts(votes);
+        leaderboardBody.innerHTML = "";
+        const posKeys = Object.keys(votes[0].selections);
+
+        posKeys.forEach(pos => {
+            let counts = {};
+            votes.forEach(v => {
+                let choice = v.selections[pos];
+                counts[choice] = (counts[choice] || 0) + 1;
+            });
+
+            let winner = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            
+            leaderboardBody.innerHTML += `<tr>
+                <td>${pos}</td>
+                <td><strong>${winner}</strong></td>
+                <td><span class="badge">${counts[winner]}</span></td>
+            </tr>`;
+
+            // Accordion and Chart rendering remain the same as your original
+            createChart(pos, counts, accordionContainer);
+        });
     } catch (e) {
-        content.innerHTML = "<p>Error loading live results.</p>";
+        leaderboardBody.innerHTML = "Error fetching cloud data.";
     }
-}
-
-// Check admin session and load
-if (localStorage.getItem("adminLoggedIn")) {
-    loadCloudData();
-} else {
-    window.location.href = "index.html";
-}
-
-function renderSummary(votes) { /* Your existing renderSummary code here */ }
-function renderCharts(votes) { /* Your existing renderCharts code here */ }
+                                                                           }
 </script>
 </body>
 </html>
